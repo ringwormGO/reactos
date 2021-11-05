@@ -1197,6 +1197,20 @@ SepDuplicateToken(
                 (AccessToken->UserAndGroups[GroupsIndex].Attributes & SE_GROUP_ENABLED) == 0)
             {
                 /*
+                 * If this group is an administrators group
+                 * and the token belongs to such group,
+                 * we've to take away TOKEN_HAS_ADMIN_GROUP
+                 * for the fact that's not enabled and as
+                 * such the token no longer belongs to
+                 * this group.
+                 */
+                if (RtlEqualSid(SeAliasAdminsSid,
+                                &AccessToken->UserAndGroups[GroupsIndex].Sid))
+                {
+                    AccessToken->TokenFlags &= ~TOKEN_HAS_ADMIN_GROUP;
+                }
+
+                /*
                  * A group is not enabled, it's time to remove
                  * from the token and update the groups index
                  * accordingly and continue with the next group.
